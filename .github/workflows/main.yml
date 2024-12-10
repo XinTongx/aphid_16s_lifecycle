@@ -21,5 +21,91 @@ for file in 220308-XTm1_S*_L001_R2_001.fastq; do
     seqtk seq -A $file > $sample
 done
 
-2.
+2. preview the quality of the reads by fastqc and MAFFT
+3. extract V1-V2 reads and V3-V4 reads
+#since I amplified V1-V2 and V3-V4 separately but sequenced them together, this is for extracting respective reads
+16S V1-V2 Primer Sequences (adapters not included) –27f(AGRGTTYGATYMTGGCTCAG, 20 bp) and 341r(CTGCWGCCHCCCGTAGG, 17 bp)
+16S V3-V4 Primer Sequences (adapters not included) – 341f(CCTACGGGDGGCWGCAG, CCTAYGGGGYGCWGCAG, 17bp) and 806r (GACTACNVGGGTMTCTAATCC, 24 bp). 
+The forward primer 341f is a mixture of the two sequences listed.
+
+$For V1-V2,
+forward_primer_v1v2="AGRGTTYGATYMTGGCTCAG"
+reverse_primer_v1v2="CTGCWGCCHCCCGTAGG"
+
+adapter_output="adapter_overview_all_samples_v1v2.txt"
+
+if [ ! -f $adapter_output ]; then
+  echo "Creating the adapter output file: $adapter_output"
+  touch $adapter_output
+fi
+
+for sample in {1..12}
+do
+  sample_id="S${sample}"
+  
+  R1_input="220308-XTm1_${sample_id}_L001_R1_001.fastq"
+  R2_input="220308-XTm1_${sample_id}_L001_R2_001.fastq"
+  
+  R1_output="trimmed_${sample_id}_V1V2_R1.fastq"
+  R2_output="trimmed_${sample_id}_V1V2_R2.fastq"
+  
+  untrimmed_R1="unassigned_${sample_id}_V1V2_R1.fastq"
+  untrimmed_R2="unassigned_${sample_id}_V1V2_R2.fastq"
+  
+  echo "Processing files: $R1_input and $R2_input"
+  
+  cutadapt -g $forward_primer_v1v2 -a $reverse_primer_v1v2 \
+    --untrimmed-output $untrimmed_R1 -o $R1_output $R1_input 2>&1 | tee -a $adapter_output
+  
+  cutadapt -g $forward_primer_v1v2 -a $reverse_primer_v1v2 \
+    --untrimmed-output $untrimmed_R2 -o $R2_output $R2_input 2>&1 | tee -a $adapter_output
+  
+  echo "Sample ${sample_id} processed: $R1_output and $R2_output"
+done
+
+echo "All adapter overview data for V1-V2 has been written to $adapter_output"
+
+
+$For V3-V4_R1
+#!/bin/bash
+
+forward_primer_1="CCTACGGGDGGCWGCAG"
+forward_primer_2="CCTAYGGGGYGCWGCAG"
+reverse_primer="GACTACNVGGGTMTCTAATCC"
+
+adapter_output="adapter_overview_all_samples.txt"
+
+if [ ! -f $adapter_output ]; then
+  echo "Creating the adapter output file: $adapter_output"
+  touch $adapter_output
+fi
+
+for sample in {1..12}
+do
+  sample_id="S${sample}"
+  R1_input="220308-XTm1_${sample_id}_L001_R1_001.fastq"  
+  R2_input="220308-XTm1_${sample_id}_L001_R2_001.fastq"
+  
+  R1_output="trimmed_${sample_id}_V3V4_R1.fastq"
+  R2_output="trimmed_${sample_id}_V3V4_R2.fastq"
+  
+  untrimmed_R1="unassigned_${sample_id}_V3V4_R1.fastq"
+  untrimmed_R2="unassigned_${sample_id}_V3V4_R2.fastq"
+  
+  echo "Processing files: $R1_input and $R2_input"
+  
+  cutadapt -g $forward_primer_1 -a $reverse_primer \
+    --untrimmed-output $untrimmed_R1 -o $R1_output $R1_input 2>&1 | tee -a $adapter_output
+  
+  cutadapt -g $forward_primer_2 -a $reverse_primer \
+    --untrimmed-output $untrimmed_R2 -o $R2_output $R2_input 2>&1 | tee -a $adapter_output
+  
+  echo "Sample ${sample_id} processed: $R1_output and $R2_output"
+done
+
+echo "All adapter overview data has been written to $adapter_output"
+
+
+
+
 
