@@ -1,0 +1,25 @@
+#Amplicon sequencing for 16S rDNA in the whole body of aphids of Tetraneura akinire (TA), T.sorini (TS) and E.harunire (EH)across the whole life cycles.
+#s1-s5:Foundress,2nd gen,root gen,sexual female,and male generation (TS)
+#s6-10:TA
+#s11-12:gall generation, root generation (EH)
+#Sample list
+220308-XTm1_S10_L001_R1_001.fastq  220308-XTm1_S12_L001_R2_001.fastq  220308-XTm1_S3_L001_R1_001.fastq  220308-XTm1_S5_L001_R2_001.fastq  220308-XTm1_S8_L001_R1_001.fastq
+220308-XTm1_S10_L001_R2_001.fastq  220308-XTm1_S1_L001_R1_001.fastq   220308-XTm1_S3_L001_R2_001.fastq  220308-XTm1_S6_L001_R1_001.fastq  220308-XTm1_S8_L001_R2_001.fastq
+220308-XTm1_S11_L001_R1_001.fastq  220308-XTm1_S1_L001_R2_001.fastq   220308-XTm1_S4_L001_R1_001.fastq  220308-XTm1_S6_L001_R2_001.fastq  220308-XTm1_S9_L001_R1_001.fastq
+220308-XTm1_S11_L001_R2_001.fastq  220308-XTm1_S2_L001_R1_001.fastq   220308-XTm1_S4_L001_R2_001.fastq  220308-XTm1_S7_L001_R1_001.fastq  220308-XTm1_S9_L001_R2_001.fastq
+220308-XTm1_S12_L001_R1_001.fastq  220308-XTm1_S2_L001_R2_001.fastq   220308-XTm1_S5_L001_R1_001.fastq  220308-XTm1_S7_L001_R2_001.fastq
+
+1. convert fastq to fasta
+#forR1
+for file in 220308-XTm1_S*_L001_R1_001.fastq; do
+    sample=$(echo $file | sed 's/220308-XTm1_S\([0-9]*\)_L001_R1_001.fastq/s\1_r1.fasta/')
+    seqtk seq -A $file > $sample
+done
+#forR2
+for file in 220308-XTm1_S*_L001_R2_001.fastq; do
+    sample=$(echo $file | sed 's/220308-XTm1_S\([0-9]*\)_L001_R2_001.fastq/s\1_r2.fasta/')
+    seqtk seq -A $file > $sample
+done
+
+2.
+
