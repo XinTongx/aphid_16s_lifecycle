@@ -105,7 +105,50 @@ done
 
 echo "All adapter overview data has been written to $adapter_output"
 
+4. Qiime2
+$nano manifest.csv
+sample-id,absolute-filepath,direction
+S1,/pathtofastq/trimmed_S1_V1V2_R1.fastq,forward
+S1,/pathtofastq/trimmed_S1_V1V2_R2.fastq,reverse
+S2,/pathtofastq/trimmed_S2_V1V2_R1.fastq,forward
+...
 
+-import 
+$qiime tools import 
+>   --type 'SampleData[PairedEndSequencesWithQuality]' \
+>   --input-path manifest.csv \
+>   --output-path demux.qza \
+>   --input-format PairedEndFastqManifestPhred33
+（but forward read quality is not ideal for later analysis so switch to single-end > using reverse reads)
 
+-import again (reverse reads only)
+$qiime tools import \
+  --type 'SampleData[SequencesWithQuality]' \
+  --input-path manifest_r.csv \
+  --output-path demux_reverse.qza \
+  --input-format SingleEndFastqManifestPhred33V2
+ 
+$qiime dada2 denoise-single \
+  --i-demultiplexed-seqs demux_reverse.qza \
+  --p-trim-left 17 \
+  --p-trunc-len 200 \
+  --p-max-ee 2 \
+  --o-table table_reverse.qza \
+  --o-representative-sequences rep-seqs_reverse.qza \
+  --o-denoising-stats stats_reverse.qza
+-denoise
+$qiime vsearch uchime-denovo   
+--i-table table_reverse.qza   
+--i-sequences rep-seqs_reverse.qza   
+--o-chimeras chimeras_reverse.qza   
+--o-nonchimeras nonchimeras_reverse.qza   
+--o-stats uchime-stats_reverse.qza
+
+wget https://www.arb-silva.de/fileadmin/silva_databases/current/Exports/SILVA_138.2_SSURef_NR99_tax_silva.fasta.gz
+sed 's/U/T/g' SILVA_138.2_SSURef_NR99_tax_silva.fasta > SILVA_138.2_SSURef_NR99_tax_silva_corrected.fasta
+$ qiime tools import \
+>   --type 'FeatureData[Sequence]' \
+>   --input-path SILVA_138.2_SSURef_NR99_tax_silva_corrected.fasta \
+>   --output-path silva_138_2_ssu_ref_nr99_seqs.qza
 
 
