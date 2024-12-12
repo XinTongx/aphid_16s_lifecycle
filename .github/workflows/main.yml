@@ -151,4 +151,49 @@ $ qiime tools import \
 >   --input-path SILVA_138.2_SSURef_NR99_tax_silva_corrected.fasta \
 >   --output-path silva_138_2_ssu_ref_nr99_seqs.qza
 
+============get silva using qiime rescript===============
 
+qiime rescript get-silva-data \
+> --p-version '138.2' \
+> --p-target 'SSURef_NR99' \
+> --o-silva-sequences silva-138.2-ssu-nr99-rna-seqs.qza \
+> --o-silva-taxonomy silva-138.2-ssu-nr99-tax.qza
+
+qiime rescript reverse-transcribe \
+ --i-rna-sequences silva-138.2-ssu-nr99-rna-seqs.qza \
+ --o-dna-sequences silva-138.2-ssu-nr99-seqs.qza
+
+qiime rescript cull-seqs \
+ --i-sequences silva-138.2-ssu-nr99-seqs.qza \
+ --o-clean-sequences silva-138.2-ssu-nr99-seqs-cleaned.qza
+
+qiime rescript filter-seqs-length-by-taxon \
+  --i-sequences silva-138.2-ssu-nr99-seqs-cleaned.qza \
+  --i-taxonomy silva-138.2-ssu-nr99-tax.qza \
+  --p-labels Archaea Bacteria Eukaryota \
+  --p-min-lens 500 600 700 \
+  --p-max-lens 1500 1500 2000 \
+  --o-filtered-seqs silva-138.2-ssu-nr99-seqs-filt.qza \
+  --o-discarded-seqs silva-138.2-ssu-nr99-seqs-discard.qza
+
+qiime rescript dereplicate \
+  --i-sequences silva-138.2-ssu-nr99-seqs-filt.qza \
+  --i-taxa silva-138.2-ssu-nr99-tax.qza \
+  --p-perc-identity 0.97 \
+  --p-mode 'lca' \
+  --o-dereplicated-sequences silva-138.2-ssu-c97-seqs-derep-lca.qza \
+  --o-dereplicated-taxa silva-138.2-ssu-c97-tax-derep-lca.qza
+=========make a new classifier==========
+qiime feature-classifier fit-classifier-naive-bayes \
+  --i-reference-reads  silva-138.2-ssu-c97-seqs-derep-lca.qza \
+  --i-reference-taxonomy silva-138.2-ssu-c97-tax-derep-lca.qza \
+  --o-classifier silva-138.2-ssu-nr99-classifier.qza
+
+qiime feature-classifier classify-sklearn \
+  --i-classifier ~/path/to/silva-138.2-ssu-nr99-classifier.qza \
+  --i-reads rep-seqs.qza \
+  --o-classification taxonomy.qza
+
+qiime metadata tabulate \
+  --m-input-file taxonomy.qza \
+  --o-visualization taxonomy.qzv
