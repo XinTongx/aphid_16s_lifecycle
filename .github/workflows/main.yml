@@ -197,3 +197,83 @@ qiime feature-classifier classify-sklearn \
 qiime metadata tabulate \
   --m-input-file taxonomy.qza \
   --o-visualization taxonomy.qzv
+
+
+
+=========alpha diversity analysis==========
+qiime diversity alpha \
+  --i-table table.qza \
+  --p-metric shannon \
+  --o-alpha-diversity shannon_vector.qza
+
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity shannon_vector.qza \
+  --m-metadata-file metadata.tsv \
+  --o-visualization alpha_group_significance.qzv
+
+qiime phylogeny align-to-tree-mafft-fasttree \
+  --i-sequences rep-seqs.qza \
+  --o-alignment aligned-rep-seqs.qza \
+  --o-masked-alignment masked-aligned-rep-seqs.qza \
+  --o-tree unrooted-tree.qza \
+  --o-rooted-tree rooted-tree.qza
+
+qiime feature-table summarize \
+  --i-table table_forward.qza \
+  --o-visualization table_forward_summary_v3.qzv
+(v1 output:
+Frequency per sample Frequency
+Minimum frequency	1,272
+1st quartile	1,465.8
+Median frequency	1,567.5
+3rd quartile	2,220.8
+Maximum frequency	5,355
+Mean frequency	2,160.7)
+(v3 output:
+Frequency per sample Frequency
+Minimum frequency	1,211
+1st quartile	1,976
+Median frequency	2,381
+3rd quartile	4,482.5
+Maximum frequency	7,999
+Mean frequency	3,428.3)
+
+qiime diversity core-metrics-phylogenetic \
+  --i-phylogeny rooted-tree.qza \
+  --i-table table_forward.qza \
+  --p-sampling-depth 1300 \
+  --m-metadata-file metadata.tsv \
+  --output-dir core-metrics-results
+
+(qiime feature-table filter-samples \
+  --i-table table_reverse.qza \
+  --p-min-frequency 1500 \
+  --o-filtered-table filtered_table.qza)
+
+
+qiime tools export \
+  --input-path shannon_vector_forward.qza \
+  --output-path exported_alpha_diversity
+ (output alpha-diversity_v1.tsv with index of each sample)
+
+========beta analysis======
+$analyzing bray-curtis distance
+qiime diversity beta \
+  --i-table table_forward.qza \
+  --p-metric braycurtis \
+  --o-distance-matrix braycurtis_distance_matrix.qza
+$pcoa>see similarity
+qiime diversity pcoa \
+  --i-distance-matrix braycurtis_distance_matrix.qza \
+  --o-pcoa braycurtis_pcoa.qza
+qiime emperor plot \
+  --i-pcoa braycurtis_pcoa.qza \
+  --m-metadata-file metadata.tsv \
+  --o-visualization braycurtis_pcoa_visualization.qzv
+qiime diversity beta-group-significance \
+  --i-distance-matrix braycurtis_distance_matrix.qza \
+  --m-metadata-file metadata.tsv \
+  --m-metadata-column life_stage \
+  --p-method permanova \
+  --o-visualization braycurtis_permanova_life_stage.qzv
+（ --m-metadata-column species \ or life_stage, or host)
