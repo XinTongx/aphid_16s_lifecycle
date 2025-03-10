@@ -255,6 +255,57 @@ qiime tools export \
   --input-path shannon_vector_forward.qza \
   --output-path exported_alpha_diversity
  (output alpha-diversity_v1.tsv with index of each sample)
+[TS]
+qiime feature-table filter-samples \
+  --i-table table_reverse.qza \              
+  --m-metadata-file metadata.tsv \   
+  --p-where "species='TS'" \         
+  --o-filtered-table table_TS.qza    
+
+qiime feature-table summarize \
+  --i-table table_TS.qza \
+  --o-visualization table_TS_summary.qzv
+qiime diversity alpha \
+  --i-table table_TS.qza \
+  --p-metric shannon \
+  --o-alpha-diversity shannon_TS.qza
+qiime diversity alpha \
+  --i-table table_TS.qza \
+  --p-metric simpson \
+  --o-alpha-diversity simpson_TS.qza
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity shannon_TS.qza \
+  --m-metadata-file metadata_TS.tsv \
+  --o-visualization shannon_alpha_group_significance_TS.qzv
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity simpson_TS.qza \
+  --m-metadata-file metadata_TS.tsv \
+  --o-visualization simpson_alpha_group_significance_TS.qzv
+[TS&TA]
+qiime feature-table filter-samples \
+  --i-table table_reverse.qza \
+  --m-metadata-file metadata.tsv \
+  --p-where "species IN ('TS', 'TA')" \
+  --o-filtered-table table_TS_TA.qza
+
+qiime diversity alpha \
+  --i-table table_TS_TA.qza \
+  --p-metric shannon \
+  --o-alpha-diversity shannon_TS_TA.qza
+
+qiime diversity alpha \
+  --i-table table_TS_TA.qza \
+  --p-metric simpson \
+  --o-alpha-diversity simpson_TS_TA.qza
+
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity shannon_TS_TA.qza \
+  --m-metadata-file metadata.tsv \
+  --o-visualization shannon_TS_TA_group_significance.qzv
+qiime diversity alpha-group-significance \
+  --i-alpha-diversity simpson_TS_TA.qza \
+  --m-metadata-file metadata.tsv \
+  --o-visualization simpson_TS_TA_group_significance.qzv
 
 ========beta analysis======
 $analyzing bray-curtis distance
