@@ -308,7 +308,7 @@ qiime diversity alpha-group-significance \
   --o-visualization simpson_TS_TA_group_significance.qzv
 
 ========beta analysis======
-$analyzing bray-curtis distance
+$analyzing bray-curtis distance (the whole dataset)
 qiime diversity beta \
   --i-table table_forward.qza \
   --p-metric braycurtis \
@@ -328,3 +328,34 @@ qiime diversity beta-group-significance \
   --p-method permanova \
   --o-visualization braycurtis_permanova_life_stage.qzv
 （ --m-metadata-column species \ or life_stage, or host)
+$for species-level, extract TA, TS separately
+$for life-stage-analysis, only TA & TS dataset are used as not enough sampling on EH life stages.
+ok first TA+TS dataset
+qiime diversity beta \
+--i-table table_TS_TA.qza \
+--p-metric braycurtis \
+--o-distance-matrix braycurtis_pcoa_distance_matrix_TATS.qza
+qiime diversity pcoa \
+  --i-distance-matrix braycurtis_pcoa_distance_matrix_TATS.qza \
+  --o-pcoa braycurtis_pcoa_TATS.qza
+qiime emperor plot \
+  --i-pcoa braycurtis_pcoa_TATS.qza \
+  --m-metadata-file metadata_TSTA.tsv \
+  --o-visualization braycurtis_pcoa_visualization_TATS.qzv
+qiime diversity beta-group-significance \
+  --i-distance-matrix braycurtis_pcoa_distance_matrix_TATS.qza \
+  --m-metadata-file metadata_TSTA.tsv \
+  --m-metadata-column life_stage \
+  --p-method permanova \
+  --o-visualization braycurtis_permanova_life_stage_TATS.qzv
+qiime diversity beta-group-significance \
+  --i-distance-matrix braycurtis_pcoa_distance_matrix_TATS.qza \
+  --m-metadata-file metadata_TSTA.tsv \
+  --m-metadata-column host \
+  --p-method permanova \
+  --o-visualization braycurtis_permanova_host_TATS.qzv
+
+to get matrix tsv for rebuilding new pcoa figure
+qiime tools export \
+>   --input-path braycurtis_pcoa_distance_matrix.qza \
+>   --output-path exported_pcoa_all
